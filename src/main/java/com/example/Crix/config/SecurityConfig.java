@@ -32,7 +32,17 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class SecurityConfig {
 
     public static final String[] PUBLIC_URLS = {"/api/v1/auth/register","/api/v1/auth/sendOtp","/api/v1/auth/login","/register","sendOtp","/v3/api-docs/**", "/v2/api-docs/**",
-            "/swagger-resources/**", "/swagger-ui/**", "/webjars/**"
+            "/swagger-resources/**", "/swagger-ui/**", "/webjars/**", "/v1/api/**",
+            "/v2/api-docs",
+            "/v3/api-docs",
+            "/v3/api-docs/**",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui/**",
+            "/webjars/**",
+            "/swagger-ui.html"
 
     };
 
@@ -68,6 +78,7 @@ public class SecurityConfig {
         http.authenticationProvider(daoAuthenticationProvider()); // Configure authentication provider
         return http.build();
     }
+
 	/*
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {

@@ -22,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +44,10 @@ public class UserServiceImpl implements UserService {
         // Check if the email is already registered
         if (this.userRepo.existsByEmail(registerRequest.getEmail())) {
             throw new EmailAlreadyExistsException("Email " + registerRequest.getEmail() + " is already registered.");
+        }
+        if(Objects.equals(registerRequest.getPassword(), registerRequest.getConfirmPassword())){
+            throw new EmailAlreadyExistsException("Wrong is already registered.");
+
         }
 
         // Map RegisterRequest to User
