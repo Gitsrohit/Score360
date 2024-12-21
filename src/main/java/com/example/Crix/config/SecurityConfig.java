@@ -10,11 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +30,10 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableWebSecurity
-@EnableWebMvc
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+
+
+
+
 public class SecurityConfig {
 
     public static final String[] PUBLIC_URLS = {"/api/v1/auth/register","/api/v1/auth/sendOtp","/api/v1/auth/login","/register","sendOtp","/v3/api-docs/**", "/v2/api-docs/**",
@@ -60,11 +65,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless authentication
+                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless authentication
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers("/api/v1/auth/register","/api/v1/auth/sendOtp","/api/v1/auth/login").permitAll() // Allow public URLs without authentication
-                        .requestMatchers(HttpMethod.GET).permitAll() // Allow GET requests without authentication
+                        .requestMatchers(HttpMethod.POST).permitAll() // Allow GET requests without authentication
                         .anyRequest().authenticated() // Authenticate any other request
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
@@ -121,17 +126,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-	/*
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
 
-	 */
+
+
+
 
     @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
+    public AuthenticationProvider daoAuthenticationProvider() {
 
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(this.customUserDetailService);
@@ -148,12 +149,12 @@ public class SecurityConfig {
 
 
     @Bean
-    public FilterRegistrationBean coresFilter() {
+    public FilterRegistrationBean<CorsFilter> coresFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
-        corsConfiguration.addAllowedOriginPattern("*");
+        corsConfiguration.addAllowedOriginPattern("https://33f6-2409-40e4-1115-6486-cce8-ffc1-3c7f-c704.ngrok-free.app");
         corsConfiguration.addAllowedHeader("Authorization");
         corsConfiguration.addAllowedHeader("Content-Type");
         corsConfiguration.addAllowedHeader("Accept");

@@ -150,13 +150,19 @@ public class AuthController {
     }
 
     @PostMapping("/sendOtp")
-    public ResponseEntity<String> sendOtp(@RequestParam String email) {
+    public ResponseEntity<BaseApiResponse<String>> sendOtp(@RequestParam String email) {
         String email2 = email.trim();
 
         String otp = otpService.generateOtp(email2);
         emailService.sendSimpleMessage(email2,"Your OTP ","OTP is "+otp);
 
-        return ResponseEntity.ok("OTP sent to " + email2+otp);
+        return ResponseEntity.ok(
+                BaseApiResponse.<String>builder()
+                        .success(true)
+                        .message("OTP Succesfully Sent")
+                        .data(otp)
+                        .build()
+        );
     }
 
     // get loggedin user data

@@ -7,6 +7,7 @@ import com.example.Crix.exceptions.ResourceNotFoundException;
 import com.example.Crix.payloads.*;
 
 import com.example.Crix.repository.UserRepo;
+import com.example.Crix.services.OtpService;
 import com.example.Crix.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -30,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     @Autowired
     UserRepo userRepo;
+    @Autowired
+    OtpService otpService;
 
 
 
@@ -45,25 +48,35 @@ public class UserServiceImpl implements UserService {
         if (this.userRepo.existsByEmail(registerRequest.getEmail())) {
             throw new EmailAlreadyExistsException("Email " + registerRequest.getEmail() + " is already registered.");
         }
-        if(Objects.equals(registerRequest.getPassword(), registerRequest.getConfirmPassword())){
-            throw new EmailAlreadyExistsException("Wrong is already registered.");
+        log.info(registerRequest.getPassword()+registerRequest.getConfirmPassword());
+        if(!Objects.equals(registerRequest.getPassword(), registerRequest.getConfirmPassword())){
+            throw new EmailAlreadyExistsException("Paasword and Confirmpassword not same");
+
+        }
+        boolean isOtpValid = otpService.verifyOtp(registerRequest.getEmail(), String.valueOf(registerRequest.getOtp()));
+        if(isOtpValid){
+            User user = this.modelMapper.map(registerRequest, User.class);
+
+            // Explicitly set fields with different names
+            user.setPhone(String.valueOf(registerRequest.getPhone()));
+
+            // Encode password
+            user.setPassword(this.passwordEncoder.encode(registerRequest.getPassword()));
+
+            // Save user
+            User newUser = this.userRepo.save(user);
+
+            // Map User to UserDto
+            return this.modelMapper.map(newUser, UserDto.class);
+
+        }
+        else{
+            throw new EmailAlreadyExistsException("Invalid Otp!!");
 
         }
 
         // Map RegisterRequest to User
-        User user = this.modelMapper.map(registerRequest, User.class);
 
-        // Explicitly set fields with different names
-        user.setPhone(registerRequest.getPhone());
-
-        // Encode password
-        user.setPassword(this.passwordEncoder.encode(registerRequest.getPassword()));
-
-        // Save user
-        User newUser = this.userRepo.save(user);
-
-        // Map User to UserDto
-        return this.modelMapper.map(newUser, UserDto.class);
     }
 
     @Override
